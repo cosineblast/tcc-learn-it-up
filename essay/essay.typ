@@ -377,6 +377,105 @@ since it involves pre-training on charts from another rhythm game osu!mania.
 
 The goal of this section is to provide a gentle introduction to the main concepts used in this project.
 
+== Audio Intensity
+
+This section paraphrases Bergstra2006 @bergstra2006 which studies algorithms for classifying recorded music by genre.
+
+Sound is a wave that travels primarily through air, its vibrations cause oscilations in pressure that can be detected by microphones and organisms. Microphones continuously measure the changes in pressure caused by sound, and computers record these
+values multiple times per second, a process known as Pulse Code Modulation (PCM).
+These measurements are typically stored in formats such as `.wav` or `.pcm`.
+
+Like any wave in physiscs, sound carries some energy as it travels, 
+and its intensity is defined as the amount of energy transfered by it to a fixed surface over a fixed time period.
+Intensity is expressed as $I = "Power" / "Area"  = "Pressure" dot "Velocity"$. In air, sound's pressure is proportional to its velocity,
+so intensity is proportional to the square of the presure, $I prop "Pressure"^2$.
+Therefore, when dealing with PCM audio samples, the energy/intensity of a wave is computed as $"Pressure"^2$.
+
+Humans beings perceive sound loudness in a logarithm scale, meaning multiplicative
+increments  in intensity result in constant increments in perceived loudness. Because of this,
+the decibel relative unit is used to compare sound intensities in terms of human perception. The decibel units of a wave $a$ compared to another wave $b$ is defined
+as $ L = 10 log_10 (I_a / I_b) = 20 log_10 (p_a / p_b) $
+
+where $I_a$, $I_b$, $p_a$, $p_b$ are the intensities and pressures of $a$ and $b$ respectively. When using
+a specific reference intensity for $I_b$, $L$ represents the loudness of the sound
+in what is known as the Phon scale.
+
+== Audio Frequency
+
+While the intensity of a sound wave determines its loudness, the details of the sound, such as musical notes, are determined by the wave's oscillation frequency. 
+Given a the signal of a wave over a time interval, the operation that
+tells us the frequencies present in the signal, their intensities,
+and their phase/alignments
+is the Fourier Transform. This operation can be interpreted both in terms of
+calculus or in terms of probabily/statistics, where it is known as the characteristic function.
+
+If one interprets a signal $f$ as a probability function of a random variable $X$,
+the presence of a certain frequency $q$ in the signal could be measured by how
+well the random variable "aligns" with the frequency. That is, how much, in
+average, the subtraction of samples of the random variable will near values
+that are integer multiples of $q$.
+
+For instance, if taking multiple
+samples of a random variable $X$ and subtracting them results in values that
+are near integers, this is an indication that $X$ is well aligned to the interval $1$.
+If subtracting samples results in values that are multiples of two, this indicates
+that the random variable aligns well to the interval $2$ (and thus, to frequency $0.5$).
+
+A natural choice for a function that measures how close to an integer
+ is a value, is the cosine function, more specifically $cos(2 pi dot x)$,
+which equals $1$ at integers and $-1$ at values ending in "$.5$". This can
+be generalized to other frequencies $q$ with $cos(q dot 2 pi dot x)$.
+
+Therefore, the value that describes the alignment of a random variable $X$
+to a frequency $q$ is the expected value of the cosine of the subtraction of
+independent samples of the distribution of $X$, expressed as:
+
+ $ bb(E)[cos(q dot 2 pi (X_1 - X_2))] $
+
+Applying the identity $cos(a - b) = cos(a) cos(b) + sin(a) sin(b)$ and the
+linearity of the expectation operator for independent variables
+($bb(E)[A + B dot C] = bb(E)[A] + bb(E)[B] dot bb(E)[C]$) we get:
+
+ $ bb(E)[cos(q dot 2 pi (X_1 - X_2))] = \
+   bb(E)[cos(q dot 2 pi X_1)cos(q dot 2 pi X_2)
+    + sin(q dot 2 pi X_1)sin(q dot 2 pi X_2)] = \
+   bb(E)[cos(q dot 2 pi X_1)]bb(E)[cos(q dot 2 pi X_2)]
+    + bb(E)[sin(q dot 2 pi X_1)]bb(E)[sin(q dot 2 pi X_2)] = \
+   bb(E)[cos(q dot 2 pi X)]^2 + bb(E)[sin(q dot 2 pi X)]^2 \
+ $
+
+which can be expressed as a vector/complex norm:
+
+$
+   bb(E)[cos(q dot 2 pi X)]^2 + bb(E)[sin(q dot 2 pi X)]^2
+= \   norm( lr(chevron.l  bb(E)[cos(q dot 2 pi X)] , bb(E)[sin(q dot 2 pi X)] chevron.r) )^2
+= \ norm(  bb(E)[cos(q dot 2 pi X)] + i bb(E)[sin(q dot 2 pi X)]  )^2
+= \ norm(  bb(E)[cos(q dot 2 pi X) + i sin(q dot 2 pi X)]  )^2
+= \ norm(  bb(E)[e^(i q 2 pi X)]  )^2
+$
+
+The value $bb(E)[e^(i q 2 pi X)]$ is known as the characteristic of $X$ at frequency $q$ and is denoted as $phi_X(q)$. The norm of this vector/complex number tells us
+about the alignment of the random variable $X$ to frequency $q$, and the direction
+of this vector tells us about the alignment/phase in the frequency. If $X$ is a
+continuous random variable with probability function $f$, this is said to be the Fourier Transform of $f$. If $X$ is a discrete random variable with probability function $f$, this is said to be the Discrete-Time Fourier Transform of $f$.
+
+If $X$ is random variable limited to integers from 0 to $N-1$,
+the Discrete Fourier Transform (DFT) of $f$ is a vector with $N$ entries
+containing samples of the Discrete-Time Fourier Transform of $f$ at frequencies
+($0$, $1/N$, ..., $(N-1)/N$). The algoriths used to efficiently compute the Discrete Fourier Transform of the signal are known as Fast Fourier Transforms (FFT).
+
+An important detail of Fourier analysis is that if a frequency of the signal
+being sampled is much higher than the frequency in which the samples are being taken,
+then this frequency will look as if it is much lower than it really is.
+If you only measure every 8 years, the Olympic Games will look as if they happen
+with the same frequency as the Vienna Biennale.
+
+
+
+#pagebreak()
+
+
+
 = Chapter 3 \ Development
 
 = Chapter 4 \ Results
