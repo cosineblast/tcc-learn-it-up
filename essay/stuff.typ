@@ -3,6 +3,7 @@
 // TODO: figure out line numbering
 // TODO: figure out how to put chapter name in page corner
 // TODO: figure out how to put numbers in headings
+// TODO: add url link styling
 
 /// General page settings
 #let template(doc) = [

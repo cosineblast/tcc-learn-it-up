@@ -260,9 +260,9 @@ and was released in 1999 in South Korea and 2001 for the rest of the world.
 Both games consist of pressing arrow shaped buttons in a dance floor, according to
 arrows being displayed in the game's screen, in synchronization to a music playing in the background.
 The arrows appear from the bottom of the screen, and scroll up until they reach a fixed panel of arrows known as the receptors.
-When the arrows reach these receptors, the player is expected press the buttons labeled with the corresponding arrows, and
+When the arrows reach these receptors, the player is expected to press the buttons labeled with the corresponding arrows, and then
 receive a judgement based on the time accuracy of their step, such as "Perfect", "Great" or "Miss".
-The arrows in a level are typically placed according to the of rhythm of the music currently playing, both in their timing, and arrow sequence.
+The arrows in a level are typically placed according to the of rhythm of the music currently playing, both in their timing and arrow sequence.
 The set of arrows that play in a level is known as a _chart_, and the process of creating one for a given music is known as _charting_.
 Both games provide dozens of music to play, with each music providing multiple charts of varying difficulty.
 @two_ddr and @two_piu show images of people playing both games.
@@ -342,23 +342,23 @@ as well as the sequence of steps, with higher levels having more complex pattern
 Altough Pump it Up has a wide variety of songs, players often desire to play
 songs that are not available in Pump. Players are often interested in playing songs of musical
 genres  that are not available in the main game series, (which limits itself mostly to classical, k-pop and electronic music),
-songs of genres that are covered by Pump it Up, but are not available in the game, partly due to copyright licensing.
+or songs of genres that are covered by Pump it Up, but are not available in the game, partly due to copyright licensing.
 
 Players that own a Pump it Up or DanceDanceRevolution pad can build their own charts for songs by using
 software such as #link("https://github.com/uvcat7/ArrowVortex")[ArrowVortex],
 but this is a complex process, that requires both considerable amounts of time and expertise in the game, to build fun and coherent charts.
-
 On top of that, considering DDR is more famous overall than Pump it Up, fan-made DDR charts are more easily accesible online.
-There are already multiple papers that study the development of machine learning models for the generation of DanceDanceRevolution charts,
-namely [DDC], [DDCL] and [GOCT], but to our knowledge, there have been no academic studies that cover machine learning generation of Pump it Up charts.
 
-TODO: Add links to references
+There are already multiple papers that study the development of machine learning models for the generation of DanceDanceRevolution charts,
+
+namely DanceDanceConvolution @ddc (DDC), DanceDanceConvLSTM @ddcl (DDCL) and
+Yi2023 @yi2023, but to our knowledge, there have been no academic studies that cover machine learning generation of Pump it Up charts.
 
 Additionally, Pump it Up has a database #link("https://www.piucenter.com/")[piucenter] that classifies, for every Pump it Up chart, the different
 kinds of styles that are present in the chart. This information can help training models that are more well directed in particular charting styles,
 as mentioned as a potential improvement in the paper DDCL:
 
-#quote(attribution: [DDCL])[
+#quote(attribution: [DanceDanceConvLSTM])[
   The Fraxtil dataset
   contains a mixture of technical and stream based
   charts, which likely creates some confusion in
@@ -368,7 +368,7 @@ as mentioned as a potential improvement in the paper DDCL:
 ]
 
 Our primary goal is to compare existing methodology in generative charting for Pump it Up, and to build the best Pump it Up chart generator so far.
-We aim to implement a Pump it Up replication of the papers DanceDanceConvolution (DDC) and DancedDanceConvLSTM (DDCL), GOCT is considered to be out of scope,
+We aim to implement a Pump it Up replication of the papers DanceDanceConvolution (DDC) and DancedDanceConvLSTM (DDCL), Yi2023 is considered to be out of scope,
 since it involves pre-training on charts from another rhythm game osu!mania.
 
 #pagebreak()
@@ -385,7 +385,4 @@ The goal of this section is to provide a gentle introduction to the main concept
 
 WIP.
 
-= References
-
-WIP.
-
+#bibliography("refs.bib", style: "ieee")
