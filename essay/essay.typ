@@ -1,4 +1,98 @@
 
+/*
+
+Plan:
+
+# Introdução
+
+## DDR e PIU
+### O que são
+- DDR: 1998
+- PIU: 1999
+
+### Diferenças
+- 5 teclas
+- culturas de charts
+- janelas de tempo
+
+### Charts
+- stepmania
+- stepf1 stepp1+ .ssc .sm
+
+# Background
+
+## Processamento de Áudio
+- Som é onda no ar
+- Intensidade = (Energia / Segundo) / Área ~= p²
+- Decibel entre a, b = log10(a/b)
+- Transformada de fourier
+- Escala mel
+- Features = log10(mel(FFT(audio)))
+
+## Machine learning
+- Definição
+- Regressão linear
+- Gradient descent
+- Unidade sigmoide
+- Regressão Logística
+- Multilayer perceptron
+- Backpropagation
+- Autograd
+- Convolução
+- RNN
+- BPTT
+- Gates: LSTM, GRU
+- Encoder-Decoder
+
+# Desenvolvimento
+- Objetivo: repicar DDC, DDCL, expandir
+- Implementar gerador de cahrts (incluir PIUCENTER)
+
+## Processamento de dados
+- Dataset: phoenix, resistance simfiles
+- parsing: msdparser
+- atributos: bpms, offset, notes
+- measures, beats
+- gimmicks, stops, speed, warps
+- conversão de beats em segundos
+- lista de bpms
+- mirroring horizontal/vertical
+
+## Extração de áudio
+- essentia
+- stft - 3 janelas /canais: Nx80x3
+
+## Implementação de DDC
+- Placement e selection
+
+### Placement/onset: cnn e lstm
+- shuffling do dataset
+- binary search
+
+- padding out of bounds com minimo
+- adam lr = 0.001, lambda = 0.0001
+- dificuldade: 1..25
+- performance: ok
+
+### Selection: LSTM
+- bag-of-arrows, one-hot
+- delta time
+
+### Resutlados
+- performance parecida com DDC original
+- F1 e AUC alinhado a 20ms para placement
+- accuracy de selection: 80%
+
+opinição pessoal:
+- steps colocados em momentos etranhos
+- steps colocados em fins de holds
+- não gera charts adequados com níveis
+- não gera crossovers
+- charts repetitivos sem informação musical (ex: orbit)
+- mas gera charts!
+
+*/
+
 #let fixme(thing) = thing
 #let towork(thing) = thing
 
@@ -264,7 +358,7 @@ Additionally, Pump it Up has a database #link("https://www.piucenter.com/")[piuc
 kinds of styles that are present in the chart. This information can help training models that are more well directed in particular charting styles,
 as mentioned as a potential improvement in the paper DDCL:
 
-#quote(attribution: [DDCL]) [
+#quote(attribution: [DDCL])[
   The Fraxtil dataset
   contains a mixture of technical and stream based
   charts, which likely creates some confusion in
@@ -274,6 +368,8 @@ as mentioned as a potential improvement in the paper DDCL:
 ]
 
 Our primary goal is to compare existing methodology in generative charting for Pump it Up, and to build the best Pump it Up chart generator so far.
+We aim to implement a Pump it Up replication of the papers DanceDanceConvolution (DDC) and DancedDanceConvLSTM (DDCL), GOCT is considered to be out of scope,
+since it involves pre-training on charts from another rhythm game osu!mania.
 
 #pagebreak()
 
