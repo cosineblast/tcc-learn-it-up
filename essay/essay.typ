@@ -382,8 +382,7 @@ The goal of this section is to provide a gentle introduction to the main concept
 This section paraphrases Bergstra2006 @bergstra2006 which studies algorithms for classifying recorded music by genre.
 
 Sound is a wave that travels primarily through air, its vibrations cause oscilations in pressure that can be detected by microphones and organisms. Microphones continuously measure the changes in pressure caused by sound, and computers record these
-values multiple times per second, a process known as Pulse Code Modulation (PCM).
-These measurements are typically stored in formats such as `.wav` or `.pcm`.
+measured values multiple times per second. This is known as Pulse Code Modulation (PCM) and files derived from this process are typically stored in formats such as `.wav` or `.pcm`.
 
 Like any wave in physiscs, sound carries some energy as it travels, 
 and its intensity is defined as the amount of energy transfered by it to a fixed surface over a fixed time period.
@@ -398,7 +397,7 @@ as $ L = 10 log_10 (I_a / I_b) = 20 log_10 (p_a / p_b) $
 
 where $I_a$, $I_b$, $p_a$, $p_b$ are the intensities and pressures of $a$ and $b$ respectively. When using
 a specific reference intensity for $I_b$, $L$ represents the loudness of the sound
-in what is known as the Phon scale.
+in the Phon scale.
 
 == Audio Frequency
 
@@ -466,14 +465,202 @@ containing samples of the Discrete-Time Fourier Transform of $f$ at frequencies
 
 An important detail of Fourier analysis is that if a frequency of the signal
 being sampled is much higher than the frequency in which the samples are being taken,
-then this frequency will look as if it is much lower than it really is.
+then this signal frequency will look as if it is much lower than it really is.
 If you only measure every 8 years, the Olympic Games will look as if they happen
-with the same frequency as the Vienna Biennale.
+with the same frequency as the Vienna Biennale or your dog's birthday. This is reflected in Nyquist-Shannon sampling theorem,
+which tells us that, for sampling rate $q$, we can only safely measure frequencies up to
+$q / 2$, the Nyquist frequency of $q$, without loss of information.
+
+Just like loudness, human beings don't perceive frequency linearly. A change from 440hz to 441hz is
+much more noticeable than a change from 4400hz to 4401hz.
+The Mel scale is a scale unit of frequency that more closely reflects the human perception, shown in @mel_scale.
+
+#figure(
+  image("Mel-Hz_plot.svg.png"),
+  caption: [Plots of pitch mel scale versus hertz scale],
+  alt: "A plot of the Mel scale in the y axis and Hertz scale in the x axis.
+  The y axis ranges from 0 to 3200 mel, whereas the x axis ranges from 0 to 10000 hertz.
+  The curve is ascending, and it's slope reduces as it grows, like a logarithm or sqrt function.
+  The curve grows fast in the slow frequencies from 0 to 500, with the mel of 500 being 600,
+  and begins to slow down after that.
+  "
+) <mel_scale>
+
+== Machine Learning
+
+This section introduces the basic concepts of machine learning, and
+the main architectures used in this work.
+
+In traditional computer science, the most common way to solve a
+problem is by designing a specialized algorithm for it, given a specification
+of the task at hand.
+However, there are many pratical problems for which there are no objective specifications, due to their subjective nature. 
+Some common examples of this include object recognition, written digit recognition, time series forecasting, 
+text translation, risk classification, among many others.
+Machine learning is the process solving a task by using existing data examples of it, without having 
+explicit instructions on how to solve the problem, and it is suitable for this kind of problem.
+
+Machine learning implementations are modelled as functions, that take input from a set $X$, and return values 
+in an output set $Y$.
+The core idea, is that the values of $Y$ have some relationship with the input
+$X$, represented by a probability $P(X, Y)$. Given a data set of $(X, Y)$ pairs, our goal is to produce a 
+function $f: X -> Y$ that respects well this relationship.
+
+In machine learning, this particular framework of problem solving is called supervised learning.
+When the set $Y$ represents discrete label values, this is said to be a classification problem,
+with the special case of $Y = {0,1}$ being known as binary classification.
+Otherwise (given a continuous $Y$), this is said to be solving a problem of regression.
+The process of producing a model function $f$ given a dataset of examples $S in (X times Y)^n$ is called training, and the process 
+of trying to infer $y in Y$ using $x in X$ (i.e computing $y = f(x)$) is called inference.
+
+In this work, all machine learning models will be tasked primarily with classification.
+
+=== Model evaluation
+
+Alhough the problems suited for machine learning usually have no objective specification, 
+it is still possible to evaluate the quality of
+a model $f$, given a set of examples. The most fundamental metric concept in machine learning is the
+loss function. A loss function $l$ takes a predicted output $y_"pred"$  and an expected output $y in Y$ and returns a 
+nonnegative real number $l(y_"pred", y)$ that tells how badly $y_"pred"$ matches $y$, with $0$ usually implying $y_"pred" = y$, 
+and its output grows as the prediction worsens. Although $Y$ is discrete in classification problems, $Y$ is often
+contained in $RR^n$ for some $n in NN$, and the loss function is usually continuous in the $y_"pred"$ parameter.
+Given a dataset $S$, and a loss function $l$, the primary goal of training is selecting a model function $f$
+that minimizes the average loss of $l$ in the set.
+
+The most common loss functions are the squared error loss, used for classification or regression: 
+$l(y_"pred", y) = (y_"pred" - y) ^ 2$,
+and the binary cross entropy loss, specialized for binary classification: $l(y_"pred", y) = -[y log y_"pred" + (1 - y)log(1 - y_"pred")]$.
+
+Although the loss function is useful for training, practical evaluation of classification models is done with more ordinary metrics. 
+Given a set of examples $S$, the accuracy of a model $f$ is defined as the percentage of examples in the set that 
+are correctly predicted by the model, i.e 
+$ "Accuracy" = 1 / (|S|) |{x,y in S : f(x) = y}| $.
+
+In binary classification (when $Y$ is ${0, 1}$), other important metrics are:
+- *Precision*: How accurate is the model when $y_"pred" = 1$; 
+$ "Precision" = {x,y in S : f(x) = y = 1} / {x, y in S : f(x) = 1} $
+- *Recall*: How accurate is the model when $y = 1$; 
+$ "Recall" = {x,y in S : f(x) = y = 1} / {x, y in S : y = 1} $
+- *F1*: The harmonic mean of precision and recall.
+$ F_1 = 2 / ("Precision"^(-1) + "Recall"^(-1)) = 
+2 ("Precision" dot "Recall") / ("Precision" + "Recall") $
+
+In order to properly evaluate a model's generalization (its capability to generalize its behavior to examples outside of its training set), it is often common to use
+an auxiliary dataset, sharing the same overall distribution with the training set, but not used in training, to apply model evaluations.
+This is known as a  valididation or test set, and it is usually done by partitioning the full example set, with a certain percentage
+of examples being used for testing/validation, and the rest for training. The term "validation set" is typically applied
+when it is used during the development of the model under training, and "test set" when it is applied to 
+measure the final performance of the model, with validation set and testing set usually being distinct partitions.
+
+When a model has a measurely better performance when evaluated in its training set, compared to its validation set, we say that it is overfitting.
+When a model has a bad performance in its own training set, we say that it is underfitting (not learning).
+
+=== Introductory Algorithms
+
+One of the most simple machine learning implementation strategies is to look up examples in the training set that are similar to the model input $x$, and
+use that information to decide the model output of $x$. This is known as the k-Nearest-Neighbours algorithm, where the "neighbours" are
+the training set examples similar to $x$ used for comparison, and $k$ is the number of neighbors to be compared. 
+It requires no previous processing of the training set, which makes it easy to implement, but also unreliable for large datasets, since inference
+requires access to the training set itself.
+It is typically associated with classification, with the most frequent label values within with neighbours of an input $x$ determining the output of $x$,
+but it can also be used for regression by, for instance, averaging the neighbours output value (interpolation).
+
+Another well known regression algorithm in machine learning is linear regression.
+In this implementation, given an input $x in RR^n$ and continuous output $Y = RR$, the model output $f(x)$ is $f(x) = b + sum_(i=1)^n w_i x_i = b + w dot x$
+where $w in RR^n$ and $b in RR$, known as weights or parameters, are computed from the training set, with $w$ being known as the input weights, and $b$ as bias. 
+
+This strategy can also be used for binary classification, where model the output $f(x)$ is 1 if $b + w dot x > 0$, and $0$ otherwise.
+A classification model of this kind is known as a linear classifier, which can be useful for their simplicity, 
+but also insufficient for some applications. A well known result in machine learning is that there is no linear classifier of two variables 
+$f : {0, 1}^2 -> {0,1}$ that can model the exclusive-or function.
+
+When the target values $Y$ are real numbers in the $[0,1]$ range, this model can be adapted into another one named logistic regression, in which the 
+model output is $f(x) = sigma(b + w dot x)$ where $sigma(x) = 1 / (1 + exp(-x))$ is known as the sigmoid function, graphed in @sigmoid. 
 
 
+#figure(
+  image("sigmoid.png", width: 50%),
+  caption: [Graph of the sigmoid function $sigma(x) = 1 / (1 + exp(-x))$, it translates the real line into the $(0, 1)$ interval],
+  alt: "A graph of the sigmoid function, from -6 to 6. 
+  This function's domain is the real number line.
+  The minus infinity limit of this function is 0, 
+  the plus infinity limit of this function is 1.
+  This function is continuous, smooth and monotone increasing." 
+) <sigmoid>
+
+=== Neural Networks
+
+A neural network is a function from features and parameters into prediction 
+output values that is differentiable with regard to the model parameters.
+The output from such networks consists of reals numbers, not $Y$ label themselves, 
+but this can be adapted for binary classification by 
+applying thresholding to the output $f(x) in RR$ (like for linear classifiers), 
+or in the case of multiple $m$ classes, 
+by interpreting the model output $f(x) in RR^m$ as probability estimates of each class,  
+and choosing the class with the greatest value in the vector $f(x) in RR^m$.
+
+A neural network is organized as a composition of differentiable functions 
+known as units, or neurons, whose output indicates the presence of a certain 
+characteristic in the input.
+The output of a typical unit has the form $f(w dot x + b)$ where 
+$x in RR^k$ are the inputs of the unit,
+$w in RR^k$ and $b in RR$ are parameters of this unit, and $f$ is known as 
+the activation function.
+
+Activations functions allow for greater flexibility in neural networks, 
+because without activation functions, units would become linear functions, and the composition of linear functions is linear, so the entire network
+would be equivalent to a linear regression, and the resulting classifier would be a linear classifier.
+Common choices of $f$ include $sigma(z) = 1/(1+ exp(-z))$, $tanh(z) = (exp(2z) - 1) / (exp(2z) + 1)$, and 
+and the linear rectifier, $"ReLu"(x) = max(0, x)$.
+Choosing $f$ as the sigmoid function $sigma(x) = 1/(1 + exp(-x))$, yields a unit identical to logistic regression, seen earlier.
+
+Given a neural network model $M : RR^n -> RR^m$ of $p$ weights, its weights $W: RR^p$, a dataset $S$, 
+and a loss function $l : (RR^m times RR^m) -> RR)$ the average loss of the model over the entire dataset is
+
+#set math.equation(numbering: "1.")
+
+$ "Loss" = 1/N sum_((x,y) in S) l(M_W (x), y) $ <loss>
+
+This loss value can be seen as the result of a function $l_W : RR^p -> RR$ that takes the model weights $W$ as argument and returns the 
+loss with respect to these weights. 
+Since the model function is differentiable with respect to the weights, and the loss functions for neural networks are also differentiable (as seen earlier),
+the whole $l_W$ function is also differentiable. 
+This allow for the application of the gradient descent training technique, which is the main advantage of neural networks.
+
+Given a differentiable function $f: RR^n -> RR$, and a point $x in RR^n$, the derivative of $f$ regarding the $i$-th input $x_i$
+indicates what happens to the result of $f$ if a tiny change $epsilon$ is introduced to $x_i$. 
+When this is positive, it means that incrementing $x_i$ increases the resulting value of $f$. 
+when this is negative, it means that
+decrementing $x_i$ increases the resulting value of $f$. 
+The core idea of gradient descent is to decrease the result of $l_W (W)$ given weights $W$, by nudging the values of $W$ based on the derivative of the $l_W$ function
+for each weight.
+A gradient descent update equation is shown in @gd. The constant $alpha$, known as learning rate, represents the length of the step to be applied each iteration,
+and $nabla l_W (W)$ is the gradient vector containing the derivative of the loss with regard to the weights.
+
+
+$ W^* <- W - alpha dot nabla l_W (W) $ <gd>
+
+This is the essence of the gradient descent update algorithm, but there are many other extensions and variants to this weight update scheme, 
+to improve its stability and speed up convergence, such as AdaGrad @adagrad and Adam @adam. 
+
+The weights are not updated after computing the gradient of the average loss over the entire dataset, but instead the dataset is divided randomly into
+smaller batches, and the weights updated after computing the loss gradient over each batch $S$. This means that $N$ in @loss is not necessarily the number
+of the examples in the whole dataset, but the number of examples in the batch being used for the update. This is known as mini-batch gradient descent,
+or when $N = 1$, it is known as stochastic gradient descent.
+Regardless of $N$, a gradient descent pass over all samples in the training dataset is known as an epoch.
+
+The algorithm used to compute $nabla l_W$ on an example in the dataset is named backpropagation. 
+A neural network $f$ is typically structured as a composition of multiple layers, $f = f_1 dot f_2 dot ... dot f_k$, $f_i : RR^(a_i) -> RR^(b_i)$.
+Backpropagation consists of first computing the gradient of the loss with regard to the final layer $f_k$, and then using that to compute the
+gradient with regard to the previous layers. 
+This can be done using the derivative chain rule, 
+$J [x |-> l(f(x))] = x |-> J [l] (f(x)) dot J [f] (x)$,
+multiplying the gradient regarding $f_(i+1)$ by the derivative of $f_i$, to obtain the gradient regarding $f_i$.
+
+
+// next: dropout, weight decay, CNN, RNN, LSTM 
 
 #pagebreak()
-
 
 
 = Chapter 3 \ Development
