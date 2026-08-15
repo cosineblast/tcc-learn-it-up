@@ -238,6 +238,12 @@ WIP.
 
 WIP.
 
+In this work:
+- Function composition is of the form $(f compose g)(x) = g(f(x))$.
+- The jacobian deriative of a function $f$ is denoted as $J[f]$.
+- Given vectors $x, y in RR^n$, $x dot.o y$ is the hadamard product of $x$ and $y$,
+that is, $(x dot.o y)_i = x_i dot y_i$.
+
 #pagebreak()
 
 = Contents
@@ -640,6 +646,8 @@ and $nabla l_W (W)$ is the gradient vector containing the derivative of the loss
 
 $ W^* <- W - alpha dot nabla l_W (W) $ <gd>
 
+#set math.equation(numbering: none)
+
 This is the essence of the gradient descent update algorithm, but there are many other extensions and variants to this weight update scheme, 
 to improve its stability and speed up convergence, such as AdaGrad @adagrad and Adam @adam. 
 
@@ -650,15 +658,147 @@ or when $N = 1$, it is known as stochastic gradient descent.
 Regardless of $N$, a gradient descent pass over all samples in the training dataset is known as an epoch.
 
 The algorithm used to compute $nabla l_W$ on an example in the dataset is named backpropagation. 
-A neural network $f$ is typically structured as a composition of multiple layers, $f = f_1 dot f_2 dot ... dot f_k$, $f_i : RR^(a_i) -> RR^(b_i)$.
+A neural network $f$ is typically structured as a composition of multiple layers, 
+$f = f_1 compose f_2 compose ... compose f_k$, $f_i : RR^(a_i) -> RR^(b_i)$.
 Backpropagation consists of first computing the gradient of the loss with regard to the final layer $f_k$, and then using that to compute the
 gradient with regard to the previous layers. 
 This can be done using the derivative chain rule, 
 $J [x |-> l(f(x))] = x |-> J [l] (f(x)) dot J [f] (x)$,
 multiplying the gradient regarding $f_(i+1)$ by the derivative of $f_i$, to obtain the gradient regarding $f_i$.
 
+This can be implemented manually, by expressing the derivatives of the layer functions directly in code, 
+but there are automatic differentiation libraries like PyTorch which can make this process easier,
+by recording the function call graphs and then executing the backpropagation on the result.
 
-// next: dropout, weight decay, CNN, RNN, LSTM 
+The most common kind of layer in neural networks consists of multiple scalar $u$ units processing the same layer input $x in RR^n$. The output
+of such layer $f$ is $ f(x) = phi(W x + b) $
+where W is a $RR^(u times n)$ matrix with the input weights of each output neuron and $b in RR^u$ is a vector with the biases of each output unit, 
+with $phi: RR^u -> RR^u$ being the activation function applied pointwise.
+These layers are typically called dense, or linear layers. Implementations often omit $phi$ from this layers,
+and treat the activation function as a separate one.
+
+An important concept for the neural networks used in this application, is the notion of a convolutional layer. 
+Given a vector/tensor $x in RR^A$ and a vector $k in RR^B$,
+the convolution of $x$ and $k$ is denoted by $x * k$ and 
+consists of dot products of $k$ with sliding portions of $x$.
+More specifically, given an index $i$, $ (x * k)_i = sum_j x[j] dot k[i-j] $.
+This operation is typically applied to one or two dimentional vectors, and can be used to apply many image and audio processing 
+operations to $x$ such as blur and sharpness, depending on the value of $k$, known as the kernel of the operation. 
+_But what is a convolution?_ @conv3b1b explains this operation and shows multiple animatated examples of it.
+
+Convolutional layers in neural networks take 2D tensors as inputs, and apply convolutions to the input with kernels whose values are parameters to be learned. 
+Convolutional layers are also typically used with _MaxPool_ layers, that perform a simular task of computing a sliding window operation on the input
+tensors, but instead of computing the dot products of the segments of the image with a kernel, 
+a max pool layer returns the maximum of these windowed segments.
+
+When performing multi-class classification, a common layer found in neural networks is the softmax layer.
+A softmax layer takes an input $x in RR^n$ and returns $"softmax"(x) in RR^n$, where
+$ "softmax"(x)_i = e^(x_i) / (sum _(j = 1) ^N e^(x_j)) $.
+The primary effect of a softmax layer, is that it returns a list of values in the $[0, 1]$ range,
+and the entries of the returned vector sum to 1, making it suitable for final output layers, as it can be interpreted as an
+estimated probability distribution over the classes.
+
+=== Regularization 
+
+Neural networks can achieve considerable performance on machine learning classification tasks,
+but, may present overfitting on their training data.
+There are many stategies to address this effect, known as regularization techniques.
+
+#let lh = $accent(l, hat)$
+
+L2 regularization, also known as weight decay, tries to limit the value of the weights in the neurons,
+by penalizing high weights in the application of the loss function. This is done by using a modified loss function $lh$ instead of the original loss function $l$,
+which returns
+$ lh (y_"pred", y) = l(y_"pred", y) + lambda / (2 N) ||W||^2 $
+Where $W in RR^p$ are the weights of the model, $||v||$ is the euclidean norm, 
+and $lambda$ is the regularization parameter, that defines how much the model should be penalized for large weights.
+
+Another, more common strategy for regularization is known as dropout. 
+Instead of changing the training routine, it introduces a new layer in the network architecture itself.
+A dropout layer, during evaluation/inference, takes an input $x in RR^n$ and returns $x$ unmodified, behaving as an identity transformation.
+However, during training, a dropout layer randomly zeroes some of the elements of the input tensor, with probabilty $p in [0, 1]$.
+This allows the trained networks not to be too reliant on the value of the neuron activations after a dropout layer, improving generalization performance.
+
+// TODO: add references to dropout papers and regularization papers
+
+// TODO: talk about normalization layers and residual connections if necessary
+
+=== Recurrent neural networks and Long Short Term Memory
+
+#let xx = $bold(x)$
+
+The neural networks covered so far all receive an input $x in RR^n$ of fixed size $n$, apply multiple transformation
+layers to it, and return an output $y in RR^m$.
+A network of this kind is known as a feedfoward network.
+These networks are useful for tasks of fixed-size input such as image classification, 
+but for some problems,
+such as text processing, language translation, weather forecast and audio processing, the input for the network has a different
+structure, consisting of a sequence $xx = (x_1, x_2, ..., x_T)$ of vetors $x_i in RR^n$.
+Recurrent neural networks (RNN) were designed to solve this kind of task.
+
+A recurrent neural network consists of a unit function $u$:
+that receives two inputs $x in RR^(n_x)$ and $s in RR^(n_s)$ and returns
+two outputs, $y in RR^(n_y)$ and $s^* in RR^(n_s)$, $ (y, s^*) = u(x, s) $.
+$s$ represents the current execution state of the network,
+$x$ represents the current input in the sequence, $y$ represents the network output and $s^*$ represents the modified state
+after processing the current input. This function $u$ is applied for every input $x_t$ in the sequence $xx$, and the state returned
+after processing input $x_t$ is used as the state passed to the next input $x_(t+1)$. @rnn shows two diagrams of RNNs,
+with the unrolled graph making the flow of states between steps explicit.
+Recurrent neural networks can also be trained with backpropagation, by adding the gradient of the model weights over each unrolled step, 
+a process known as backpropagation through time.
+
+#figure(
+  image("rnn.png"),
+  caption: [Diagram of a recurrent neural network, 
+  in compressed form (left) and unfolded form (right). ]
+) <rnn>
+
+Recurrent networks can be used with a direct feedfoward structure for the unit function $u$, 
+but this generally leads to problems with gradient descent, since for an input of large size $T$, 
+this is equivalent to running a feedforward network with $T$ layers, 
+and since each layer multiplies its function's derivative $J[u]$ to the derivative of its previous layer,
+the derivatives for early layers scales to $J[u]^T$, so for entries greater than 1, their derivatives tend to infinity, 
+and for entries less than 1, they tend to 0. This is known as the exploding/vanishing gradient problem.
+
+#let ctilde = $accent(c, ~)$
+
+Long Short Term Memory (LSTM) is an RNN architecture built to address this problem 
+and improve model flexibility. 
+
+In LSTM and similar constructions, gates are intermediary values in the computation of the recurrent unit's output that 
+add control over which values will be used for the new state and the unit's output.
+In the case of the traditional LSTM with forget gates @lstm2, there are three gates:
+- The forget gate $f$ is a mask that determines how much of the previous state $c$ will be kept or forgotten in the current step.
+- The input gate $i$ is a mask that determines whether or not entries of a computed change vector $ctilde$ should be added to state.
+- The output gate $o$ is a mask that determines the entries of the state that are revelant for the next steps. 
+
+#pagebreak()
+These gates are used in a LSTM unit according to the following equations:
+
+$ f_t & = sigma(W_f x_t + U_f h_(t-1) + b_f) \
+i_t & = sigma(W_i x_t + U_i h_(t-1) + b_i) \
+o_t & = sigma(W_o x_t + U_o h_(t-1) + b_o) \
+ctilde_t & = tanh(W_ctilde x_t + U_ctilde h_(t-1) + b_ctilde) \
+\
+c_t & = f dot.o c_(t-1) + i dot.o ctilde \
+h_t & = c_t dot.o o_t
+$
+
+
+In this equation, $sigma$ is the sigmoid function seen earlier, 
+and $tanh$ is the hyperbolic tangent function, 
+which serves as an alternative activation function returning values
+in the $[-1, 1]$ range. 
+The hyperbolic tangent is used in $ctilde$ as this value represents a delta-like change 
+to be added to the state.
+
+
+Note that the change value $ctilde_t$ and the gates use $h_t$ in their computation
+instead of $c_t$. This value $h_t$ consists of a masked version of $c_t$, 
+controlled by the output gate, and allows the model to ignore state information that
+is not relevant for the current and following inputs, serving as a form
+of focused short term memory. As such, the state $s$ of a LSTM unit consists of both
+$h$ and $c$, $s = (h, c)$. The output $y$ of a LSTM unit is usually derived from $h$.
 
 #pagebreak()
 
