@@ -702,6 +702,10 @@ $ "softmax"(x)_i = e^(x_i) / (sum _(j = 1) ^N e^(x_j)) $
 The primary effect of a softmax layer, is that it returns a list of values in the $[0, 1]$ range,
 and the entries of the returned vector sum up to 1, making it suitable for final output layers, as it can be interpreted as an
 estimated probability distribution over the classes.
+This can be seen a continuous counterpart of the one-hot encoding, 
+which consists of representing labels of classes by vectors, with as many entries as classes,
+and having all entries as 0, except for the entry associated with the class the vector represents, where
+it is a 1.
 
 === Regularization 
 
@@ -731,6 +735,10 @@ This allows the trained networks not to be too reliant on the value of the neuro
 === Recurrent neural networks and Long Short Term Memory
 
 #let xx = $upright(bold(x))$
+#let yy = $upright(bold(y))$
+#let hh = $upright(bold(h))$
+#let aa = $upright(bold(a))$
+
 
 The neural networks covered so far all receive an input $x in RR^n$ of fixed size $n$, apply multiple transformation
 layers to it, and return an output $y in RR^m$.
@@ -797,7 +805,6 @@ in the $[-1, 1]$ range.
 The hyperbolic tangent is used in $ctilde$ as this value represents a delta-like change 
 to be added to the state.
 
-
 Note that the change value $ctilde_t$ and the gates use $h_t$ in their computation
 instead of $c_t$. This value $h_t$ consists of a masked version of $c_t$, 
 controlled by the output gate, and allows the model to ignore state information that
@@ -807,8 +814,50 @@ $h$ and $c$, $s = (h, c)$. The output $y$ of a LSTM unit is usually derived from
 
 === Encoder-Decoder
 
-#pagebreak()
+Recurrent neural networks process an input sequence $xx$ into an output sequence $yy$ of same size as $xx$.
+This can be useful for many tasks, such as weather forecasting or speech recognition.
+However, many applications, such as text translation, need an output sequence whose length does not necessarily 
+match the input sequence. The encoder-decoder is a network architecture used to solve this.
 
+In an encoder-decoder network, in order to generate the output for an input $xx$ of size $T$, $xx$ is first 
+passed to a sequence processing network such as an LSTM, to produce an intermediary sequence $hh$, of size $T$.
+This first network is known as the encoder.
+
+#let INIT = $bold("INIT")$
+#let END = $bold("END")$
+#let END = $bold("END")$
+
+Then a second network, known as the decoder, uses the $hh$ states to generate the final output.
+First, this network receives a special input vector $INIT$ that indicates the start of the sequence, and then returns
+the first output vector $y_1$.
+Then, the output $y_1$ of the network is fed as input for it, which then produces $y_2$. This
+process is repeated until the network returns a special vector $END$.
+The final sequence $yy$ consists of the vectors $(y_1, y_2, ..., y_r)$ returned by the decoder, not including the $END$ vector.
+These $INIT$ and $END$ vectors can be implemented by adding a {0, 1} feature to the input and output vectors, 
+which indicates whether or not it is the start/end of sequence vector.
+
+The encoded values $hh$ are used as additional input for the decoder network. 
+In the first implementations of encoder-decoder with recurrent neural networks, 
+the last element of $hh$, $h_T$, was used as an additional input for the decoder at every iteration @cho2014.
+Later on, this was modified by selecting $h$ based on the current decoding state $s$.
+This is done by implementing a continuous comparison function $a(s, h_i)$ which takes the 
+current decoder state $s$ and an element from the decoded sequence $h_i$ and returns a 
+number indicating the relevance of $h_i$ given $s$. This is computed for all $hh$ vectors, 
+and then the softmax function is applied to thses values. 
+The $h$ vector used as input for the current decoding iteration is then computed as an average
+of the $hh$ vectors weighted by the coefficients returned by softmax @alignAndTranslate.
+This is known as an attention mechanism.
+
+/*
+$ 
+upright(a) = (a(s, h_1), ..., a(s, h_T)) \
+alpha = "softmax"(upright(a)) \
+h = sum_(i = 1)^T h_i dot alpha_i
+$
+*/
+
+
+#pagebreak()
 
 = Chapter 3 \ Development
 
