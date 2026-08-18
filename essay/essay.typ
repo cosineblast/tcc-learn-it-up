@@ -241,8 +241,8 @@ WIP.
 In this work:
 - Function composition is of the form $(f compose g)(x) = g(f(x))$.
 - The jacobian deriative of a function $f$ is denoted as $J[f]$.
-- Given vectors $x, y in RR^n$, $x dot.o y$ is the hadamard product of $x$ and $y$,
-that is, $(x dot.o y)_i = x_i dot y_i$.
+- Given vectors $x, y in RR^n$, $x dot.o y$ is the hadamard product of $x$ and $y$, that is
+$ (x dot.o y)_i = x_i dot y_i $
 
 #pagebreak()
 
@@ -356,11 +356,10 @@ but this is a complex process, that requires both considerable amounts of time a
 On top of that, considering DDR is more famous overall than Pump it Up, fan-made DDR charts are more easily accesible online.
 
 There are already multiple papers that study the development of machine learning models for the generation of DanceDanceRevolution charts,
-
 namely DanceDanceConvolution @ddc (DDC), DanceDanceConvLSTM @ddcl (DDCL) and
 Yi2023 @yi2023, but to our knowledge, there have been no academic studies that cover machine learning generation of Pump it Up charts.
 
-Additionally, Pump it Up has a database #link("https://www.piucenter.com/")[piucenter] that classifies, for every Pump it Up chart, the different
+Additionally, Pump it Up has a database #link("https://www.piucenter.com/")[piucenter.com] that classifies, for every Pump it Up chart, the different
 kinds of styles that are present in the chart. This information can help training models that are more well directed in particular charting styles,
 as mentioned as a potential improvement in the paper DDCL:
 
@@ -785,7 +784,6 @@ In the case of the traditional LSTM with forget gates @lstm2, there are three ga
 - The input gate $i$ is a mask that determines whether or not entries of a computed change vector $ctilde$ should be added to state.
 - The output gate $o$ is a mask that determines the entries of the state that are revelant for the next steps. 
 
-#pagebreak()
 These gates are used in a LSTM unit according to the following equations:
 
 $ f_t & = sigma(W_f x_t + U_f h_(t-1) + b_f) \
