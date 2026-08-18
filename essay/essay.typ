@@ -501,10 +501,10 @@ In traditional computer science, the most common way to solve a
 problem is by designing a specialized algorithm for it, given a specification
 of the task at hand.
 However, there are many pratical problems for which there are no objective specifications, due to their subjective nature. 
-Some common examples of this include object recognition, written digit recognition, time series forecasting, 
+Some common examples of this include object and written digit recognition, time series forecasting, 
 text translation, risk classification, among many others.
 Machine learning is the process solving a task by using existing data examples of it, without having 
-explicit instructions on how to solve the problem, and it is suitable for this kind of problem.
+explicit instructions on how to solve the problem, and it is suitable for this kind of application.
 
 Machine learning implementations are modelled as functions, that take input from a set $X$, and return values 
 in an output set $Y$.
@@ -523,24 +523,24 @@ In this work, all machine learning models will be tasked primarily with classifi
 
 === Model evaluation
 
-Alhough the problems suited for machine learning usually have no objective specification, 
+Although the problems suited for machine learning usually have no objective specification, 
 it is still possible to evaluate the quality of
 a model $f$, given a set of examples. The most fundamental metric concept in machine learning is the
-loss function. A loss function $l$ takes a predicted output $y_"pred"$  and an expected output $y in Y$ and returns a 
-nonnegative real number $l(y_"pred", y)$ that tells how badly $y_"pred"$ matches $y$, with $0$ usually implying $y_"pred" = y$, 
+loss function. A loss function $ell$ takes a predicted output $y_"pred"$  and an expected output $y in Y$ and returns a 
+nonnegative real number $ell(y_"pred", y)$ that tells how badly $y_"pred"$ matches $y$, with $0$ usually implying $y_"pred" = y$, 
 and its output grows as the prediction worsens. Although $Y$ is discrete in classification problems, $Y$ is often
 contained in $RR^n$ for some $n in NN$, and the loss function is usually continuous in the $y_"pred"$ parameter.
-Given a dataset $S$, and a loss function $l$, the primary goal of training is selecting a model function $f$
-that minimizes the average loss of $l$ in the set.
+Given a dataset $S$, and a loss function $ell$, the primary goal of training is selecting a model function $f$
+that minimizes the average loss of $ell$ in the set.
 
-The most common loss functions are the squared error loss, used for classification or regression: 
-$l(y_"pred", y) = (y_"pred" - y) ^ 2$,
-and the binary cross entropy loss, specialized for binary classification: $l(y_"pred", y) = -[y log y_"pred" + (1 - y)log(1 - y_"pred")]$.
+The most common loss functions are:
+- The squared error loss, used for classification or regression $ ell(y_"pred", y) = (y_"pred" - y) ^ 2 $
+- The binary cross entropy loss, specialized for binary classification $ ell(y_"pred", y) = -[y log y_"pred" + (1 - y)log(1 - y_"pred")] $
 
-Although the loss function is useful for training, practical evaluation of classification models is done with more ordinary metrics. 
+Although the loss function is useful for training, practical evaluation of classification models is done with more interpretable metrics. 
 Given a set of examples $S$, the accuracy of a model $f$ is defined as the percentage of examples in the set that 
 are correctly predicted by the model, i.e 
-$ "Accuracy" = 1 / (|S|) |{x,y in S : f(x) = y}| $.
+$ "Accuracy" = 1 / (|S|) |{x,y in S : f(x) = y}| $
 
 In binary classification (when $Y$ is ${0, 1}$), other important metrics are:
 - *Precision*: How accurate is the model when $y_"pred" = 1$; 
@@ -564,16 +564,17 @@ When a model has a bad performance in its own training set, we say that it is un
 === Introductory Algorithms
 
 One of the most simple machine learning implementation strategies is to look up examples in the training set that are similar to the model input $x$, and
-use that information to decide the model output of $x$. This is known as the k-Nearest-Neighbours algorithm, where the "neighbours" are
+use that information to decide the model output $f(x)$. This is known as the k-Nearest-Neighbours algorithm, where the "neighbours" are
 the training set examples similar to $x$ used for comparison, and $k$ is the number of neighbors to be compared. 
 It requires no previous processing of the training set, which makes it easy to implement, but also unreliable for large datasets, since inference
 requires access to the training set itself.
-It is typically associated with classification, with the most frequent label values within with neighbours of an input $x$ determining the output of $x$,
+It is typically associated with classification, with the most frequent label values 
+within the neighbours of an input $x$ determining the output of $x$,
 but it can also be used for regression by, for instance, averaging the neighbours output value (interpolation).
 
 Another well known regression algorithm in machine learning is linear regression.
-In this implementation, given an input $x in RR^n$ and continuous output $Y = RR$, the model output $f(x)$ is $f(x) = b + sum_(i=1)^n w_i x_i = b + w dot x$
-where $w in RR^n$ and $b in RR$, known as weights or parameters, are computed from the training set, with $w$ being known as the input weights, and $b$ as bias. 
+In this implementation, given an input $x in RR^n$ and continuous output $Y subset RR$, the model output $f(x)$ is $f(x) = b + sum_(i=1)^n w_i x_i = b + w dot x$
+where $w in RR^n$ and $b in RR$, known as weights or parameters, are computed from the training set, with $w$ being known as the input weights, and $b$ as the bias. 
 
 This strategy can also be used for binary classification, where model the output $f(x)$ is 1 if $b + w dot x > 0$, and $0$ otherwise.
 A classification model of this kind is known as a linear classifier, which can be useful for their simplicity, 
@@ -608,29 +609,30 @@ and choosing the class with the greatest value in the vector $f(x) in RR^m$.
 A neural network is organized as a composition of differentiable functions 
 known as units, or neurons, whose output indicates the presence of a certain 
 characteristic in the input.
-The output of a typical unit has the form $f(w dot x + b)$ where 
+The output of a typical unit has the form $phi(w dot x + b)$ where 
 $x in RR^k$ are the inputs of the unit,
-$w in RR^k$ and $b in RR$ are parameters of this unit, and $f$ is known as 
+$w in RR^k$ and $b in RR$ are parameters of this unit, and $phi$ is known as 
 the activation function.
 
 Activations functions allow for greater flexibility in neural networks, 
 because without activation functions, units would become linear functions, and the composition of linear functions is linear, so the entire network
 would be equivalent to a linear regression, and the resulting classifier would be a linear classifier.
-Common choices of $f$ include $sigma(z) = 1/(1+ exp(-z))$, $tanh(z) = (exp(2z) - 1) / (exp(2z) + 1)$, and 
+Common choices of $phi$ include $sigma(z) = 1/(1+ exp(-z))$, $tanh(z) = (exp(2z) - 1) / (exp(2z) + 1)$, and 
 and the linear rectifier, $"ReLu"(x) = max(0, x)$.
-Choosing $f$ as the sigmoid function $sigma(x) = 1/(1 + exp(-x))$, yields a unit identical to logistic regression, seen earlier.
+Choosing $phi$ as the sigmoid function $sigma(x) = 1/(1 + exp(-x))$, yields a unit identical to logistic regression, mentioned earlier.
 
-Given a neural network model $M : RR^n -> RR^m$ of $p$ weights, its weights $W: RR^p$, a dataset $S$, 
-and a loss function $l : (RR^m times RR^m) -> RR)$ the average loss of the model over the entire dataset is
+Given a neural network model $M_W : RR^n -> RR^m$ of $p$ weights, 
+its weights $W in RR^p$, a dataset $S subset RR^n times RR ^m$, 
+and a loss function $ell : (RR^m times RR^m) -> RR$ the average loss of the model over the entire dataset is
 
 #set math.equation(numbering: "1.")
 
-$ "Loss" = 1/N sum_((x,y) in S) l(M_W (x), y) $ <loss>
+$ "Loss" = 1/N sum_((x,y) in S) ell(M_W (x), y) $ <loss>
 
-This loss value can be seen as the result of a function $l_W : RR^p -> RR$ that takes the model weights $W$ as argument and returns the 
+This loss value can be seen as the result of a function $ell_W : RR^p -> RR$ that takes the model weights $W$ as argument and returns the 
 loss with respect to these weights. 
 Since the model function is differentiable with respect to the weights, and the loss functions for neural networks are also differentiable (as seen earlier),
-the whole $l_W$ function is also differentiable. 
+the whole $ell_W$ function is differentiable. 
 This allow for the application of the gradient descent training technique, which is the main advantage of neural networks.
 
 Given a differentiable function $f: RR^n -> RR$, and a point $x in RR^n$, the derivative of $f$ regarding the $i$-th input $x_i$
@@ -638,13 +640,13 @@ indicates what happens to the result of $f$ if a tiny change $epsilon$ is introd
 When this is positive, it means that incrementing $x_i$ increases the resulting value of $f$. 
 when this is negative, it means that
 decrementing $x_i$ increases the resulting value of $f$. 
-The core idea of gradient descent is to decrease the result of $l_W (W)$ given weights $W$, by nudging the values of $W$ based on the derivative of the $l_W$ function
+The core idea of gradient descent is to decrease the result of $ell_W (W)$ given weights $W$, by nudging the values of $W$ based on the derivative of the $ell_W$ function
 for each weight.
 A gradient descent update equation is shown in @gd. The constant $alpha$, known as learning rate, represents the length of the step to be applied each iteration,
-and $nabla l_W (W)$ is the gradient vector containing the derivative of the loss with regard to the weights.
+and $nabla ell_W (W)$ is the gradient vector containing the derivative of the loss with regard to the weights.
 
 
-$ W^* <- W - alpha dot nabla l_W (W) $ <gd>
+$ W^* <- W - alpha dot nabla ell_W (W) $ <gd>
 
 #set math.equation(numbering: none)
 
@@ -657,13 +659,13 @@ of the examples in the whole dataset, but the number of examples in the batch be
 or when $N = 1$, it is known as stochastic gradient descent.
 Regardless of $N$, a gradient descent pass over all samples in the training dataset is known as an epoch.
 
-The algorithm used to compute $nabla l_W$ on an example in the dataset is named backpropagation. 
+The algorithm used to compute $nabla ell_W$ on an example in the dataset is named backpropagation. 
 A neural network $f$ is typically structured as a composition of multiple layers, 
 $f = f_1 compose f_2 compose ... compose f_k$, $f_i : RR^(a_i) -> RR^(b_i)$.
 Backpropagation consists of first computing the gradient of the loss with regard to the final layer $f_k$, and then using that to compute the
 gradient with regard to the previous layers. 
 This can be done using the derivative chain rule, 
-$J [x |-> l(f(x))] = x |-> J [l] (f(x)) dot J [f] (x)$,
+$J [x |-> ell(f(x))] = x |-> J [ell] (f(x)) dot J [f] (x)$,
 multiplying the gradient regarding $f_(i+1)$ by the derivative of $f_i$, to obtain the gradient regarding $f_i$.
 
 This can be implemented manually, by expressing the derivatives of the layer functions directly in code, 
@@ -681,10 +683,13 @@ An important concept for the neural networks used in this application, is the no
 Given a vector/tensor $x in RR^A$ and a vector $k in RR^B$,
 the convolution of $x$ and $k$ is denoted by $x * k$ and 
 consists of dot products of $k$ with sliding portions of $x$.
-More specifically, given an index $i$, $ (x * k)_i = sum_j x[j] dot k[i-j] $.
-This operation is typically applied to one or two dimentional vectors, and can be used to apply many image and audio processing 
+More specifically, given an index
+$i$, $ (x * k)_i = sum_j x[j] dot k[i-j] $
+This operation is typically applied to one or two dimentional vectors, 
+and can be used to perform many image and audio processing 
 operations to $x$ such as blur and sharpness, depending on the value of $k$, known as the kernel of the operation. 
-_But what is a convolution?_ @conv3b1b explains this operation and shows multiple animatated examples of it.
+_But what is a convolution?_ @conv3b1b explains this operation in more detail
+with animatated examples.
 
 Convolutional layers in neural networks take 2D tensors as inputs, and apply convolutions to the input with kernels whose values are parameters to be learned. 
 Convolutional layers are also typically used with _MaxPool_ layers, that perform a simular task of computing a sliding window operation on the input
@@ -693,9 +698,9 @@ a max pool layer returns the maximum of these windowed segments.
 
 When performing multi-class classification, a common layer found in neural networks is the softmax layer.
 A softmax layer takes an input $x in RR^n$ and returns $"softmax"(x) in RR^n$, where
-$ "softmax"(x)_i = e^(x_i) / (sum _(j = 1) ^N e^(x_j)) $.
+$ "softmax"(x)_i = e^(x_i) / (sum _(j = 1) ^N e^(x_j)) $
 The primary effect of a softmax layer, is that it returns a list of values in the $[0, 1]$ range,
-and the entries of the returned vector sum to 1, making it suitable for final output layers, as it can be interpreted as an
+and the entries of the returned vector sum up to 1, making it suitable for final output layers, as it can be interpreted as an
 estimated probability distribution over the classes.
 
 === Regularization 
@@ -707,9 +712,9 @@ There are many stategies to address this effect, known as regularization techniq
 #let lh = $accent(l, hat)$
 
 L2 regularization, also known as weight decay, tries to limit the value of the weights in the neurons,
-by penalizing high weights in the application of the loss function. This is done by using a modified loss function $lh$ instead of the original loss function $l$,
+by penalizing high weights in the application of the loss function. This is done by using a modified loss function $lh$ instead of the original loss function $ell$,
 which returns
-$ lh (y_"pred", y) = l(y_"pred", y) + lambda / (2 N) ||W||^2 $
+$ lh (y_"pred", y) = ell(y_"pred", y) + lambda / (2 N) ||W||^2 $
 Where $W in RR^p$ are the weights of the model, $||v||$ is the euclidean norm, 
 and $lambda$ is the regularization parameter, that defines how much the model should be penalized for large weights.
 
@@ -725,7 +730,7 @@ This allows the trained networks not to be too reliant on the value of the neuro
 
 === Recurrent neural networks and Long Short Term Memory
 
-#let xx = $bold(x)$
+#let xx = $upright(bold(x))$
 
 The neural networks covered so far all receive an input $x in RR^n$ of fixed size $n$, apply multiple transformation
 layers to it, and return an output $y in RR^m$.
@@ -738,7 +743,7 @@ Recurrent neural networks (RNN) were designed to solve this kind of task.
 
 A recurrent neural network consists of a unit function $u$:
 that receives two inputs $x in RR^(n_x)$ and $s in RR^(n_s)$ and returns
-two outputs, $y in RR^(n_y)$ and $s^* in RR^(n_s)$, $ (y, s^*) = u(x, s) $.
+two outputs, $y in RR^(n_y)$ and $s^* in RR^(n_s)$, $ (y, s^*) = u(x, s) $
 $s$ represents the current execution state of the network,
 $x$ represents the current input in the sequence, $y$ represents the network output and $s^*$ represents the modified state
 after processing the current input. This function $u$ is applied for every input $x_t$ in the sequence $xx$, and the state returned
@@ -799,6 +804,8 @@ controlled by the output gate, and allows the model to ignore state information 
 is not relevant for the current and following inputs, serving as a form
 of focused short term memory. As such, the state $s$ of a LSTM unit consists of both
 $h$ and $c$, $s = (h, c)$. The output $y$ of a LSTM unit is usually derived from $h$.
+
+=== Encoder-Decoder
 
 #pagebreak()
 
