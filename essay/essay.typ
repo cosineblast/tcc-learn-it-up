@@ -317,8 +317,9 @@ In DDR, the player must press the button when
 the top of the arrow hits the receptor. Releasing it
 before the bottom of the arrow hits the receptor
 counts as a single miss.
-In PIU, the hold arrow counts as a multiple arrows that are scored continuously as
-player is holds them during the long arrow.
+In PIU, the hold arrow counts as a multiple arrows 
+that are scored continuously as
+the player is holds the step during the long arrow.
 Because of this, hold arrows are of greater importance in PIU, and missing them has
 a greater impact in the final score. In some cases, this mechanic allows the player to quickly
 release the hold step and press it again, if done during the interval between
@@ -345,7 +346,7 @@ as well as the sequence of steps, with higher levels having more complex pattern
 
 == Motivation
 
-Altough Pump it Up has a wide variety of songs, players often desire to play
+Altough Pump it Up has a wide variety of songs, users often desire to play
 songs that are not available in Pump. Players are often interested in playing songs of musical
 genres  that are not available in the main game series, (which limits itself mostly to classical, k-pop and electronic music),
 or songs of genres that are covered by Pump it Up, but are not available in the game, partly due to copyright licensing.
@@ -411,7 +412,7 @@ Given a the signal of a wave over a time interval, the operation that
 tells us the frequencies present in the signal, their intensities,
 and their phase/alignments
 is the Fourier Transform. This operation can be interpreted both in terms of
-calculus or in terms of probabily/statistics, where it is known as the characteristic function.
+calculus or in terms of probability/statistics, where it is known as the characteristic function.
 
 If one interprets a signal $f$ as a probability function of a random variable $X$,
 the presence of a certain frequency $q$ in the signal could be measured by how
@@ -466,7 +467,7 @@ continuous random variable with probability function $f$, this is said to be the
 If $X$ is random variable limited to integers from 0 to $N-1$,
 the Discrete Fourier Transform (DFT) of $f$ is a vector with $N$ entries
 containing samples of the Discrete-Time Fourier Transform of $f$ at frequencies
-($0$, $1/N$, ..., $(N-1)/N$). The algoriths used to efficiently compute the Discrete Fourier Transform of the signal are known as Fast Fourier Transforms (FFT).
+($0$, $1/N$, ..., $(N-1)/N$). The algorithms used to efficiently compute the Discrete Fourier Transform of the signal are known as Fast Fourier Transforms (FFT).
 
 An important detail of Fourier analysis is that if a frequency of the signal
 being sampled is much higher than the frequency in which the samples are being taken,
@@ -515,7 +516,7 @@ In machine learning, this particular framework of problem solving is called supe
 When the set $Y$ represents discrete label values, this is said to be a classification problem,
 with the special case of $Y = {0,1}$ being known as binary classification.
 Otherwise (given a continuous $Y$), this is said to be solving a problem of regression.
-The process of producing a model function $f$ given a dataset of examples $S in (X times Y)^n$ is called training, and the process 
+The process of producing a model function $f$ given a dataset of examples $S subset X times Y$ is called training, and the process 
 of trying to infer $y in Y$ using $x in X$ (i.e computing $y = f(x)$) is called inference.
 
 In this work, all machine learning models will be tasked primarily with classification.
@@ -620,15 +621,17 @@ Common choices of $phi$ include $sigma(z) = 1/(1+ exp(-z))$, $tanh(z) = (exp(2z)
 and the linear rectifier, $"ReLu"(x) = max(0, x)$.
 Choosing $phi$ as the sigmoid function $sigma(x) = 1/(1 + exp(-x))$, yields a unit identical to logistic regression, mentioned earlier.
 
+#let ww = $bold(upright(w))$
+
 Given a neural network model $M_W : RR^n -> RR^m$ of $p$ weights, 
-its weights $W in RR^p$, a dataset $S subset RR^n times RR ^m$, 
+its weights $ww in RR^p$, a dataset $S subset RR^n times RR ^m$, 
 and a loss function $ell : (RR^m times RR^m) -> RR$ the average loss of the model over the entire dataset is
 
 #set math.equation(numbering: "1.")
 
 $ "Loss" = 1/N sum_((x,y) in S) ell(M_W (x), y) $ <loss>
 
-This loss value can be seen as the result of a function $ell_W : RR^p -> RR$ that takes the model weights $W$ as argument and returns the 
+This loss value can be seen as the result of a function $ell_W : RR^p -> RR$ that takes the model weights $ww$ as argument and returns the 
 loss with respect to these weights. 
 Since the model function is differentiable with respect to the weights, and the loss functions for neural networks are also differentiable (as seen earlier),
 the whole $ell_W$ function is differentiable. 
@@ -639,10 +642,10 @@ indicates what happens to the result of $f$ if a tiny change $epsilon$ is introd
 When this is positive, it means that incrementing $x_i$ increases the resulting value of $f$. 
 when this is negative, it means that
 decrementing $x_i$ increases the resulting value of $f$. 
-The core idea of gradient descent is to decrease the result of $ell_W (W)$ given weights $W$, by nudging the values of $W$ based on the derivative of the $ell_W$ function
+The core idea of gradient descent is to decrease the result of $ell_W (ww)$ given weights $ww$, by nudging the values of $ww$ based on the derivative of the $ell_W$ function
 for each weight.
 A gradient descent update equation is shown in @gd. The constant $alpha$, known as learning rate, represents the length of the step to be applied each iteration,
-and $nabla ell_W (W)$ is the gradient vector containing the derivative of the loss with regard to the weights.
+and $nabla ell_W (ww)$ is the gradient vector containing the derivative of the loss with regard to the weights.
 
 
 $ W^* <- W - alpha dot nabla ell_W (W) $ <gd>
@@ -712,13 +715,13 @@ Neural networks can achieve considerable performance on machine learning classif
 but, may present overfitting on their training data.
 There are many stategies to address this effect, known as regularization techniques.
 
-#let lh = $accent(l, hat)$
+#let lh = $accent(ell, hat)$
 
 L2 regularization, also known as weight decay, tries to limit the value of the weights in the neurons,
 by penalizing high weights in the application of the loss function. This is done by using a modified loss function $lh$ instead of the original loss function $ell$,
 which returns
-$ lh (y_"pred", y) = ell(y_"pred", y) + lambda / (2 N) ||W||^2 $
-Where $W in RR^p$ are the weights of the model, $||v||$ is the euclidean norm, 
+$ lh (y_"pred", y) = ell(y_"pred", y) + lambda / (2 N) ||ww||^2 $
+Where $ww in RR^p$ are the weights of the model, $||dot||$ is the euclidean norm, 
 and $lambda$ is the regularization parameter, that defines how much the model should be penalized for large weights.
 
 Another, more common strategy for regularization is known as dropout. 
@@ -748,7 +751,7 @@ such as text processing, language translation, weather forecast and audio proces
 structure, consisting of a sequence $xx = (x_1, x_2, ..., x_T)$ of vetors $x_i in RR^n$.
 Recurrent neural networks (RNN) were designed to solve this kind of task.
 
-A recurrent neural network consists of a unit function $u$:
+A recurrent neural network consists of a unit function $u$
 that receives two inputs $x in RR^(n_x)$ and $s in RR^(n_s)$ and returns
 two outputs, $y in RR^(n_y)$ and $s^* in RR^(n_s)$, $ (y, s^*) = u(x, s) $
 $s$ represents the current execution state of the network,
@@ -766,7 +769,7 @@ a process known as backpropagation through time.
 ) <rnn>
 
 Recurrent networks can be used with a direct feedfoward structure for the unit function $u$, 
-but this generally leads to problems with gradient descent, since for an input of large size $T$, 
+but this generally leads to problems with gradient descent, since for an input sequence of large size $T$, 
 this is equivalent to running a feedforward network with $T$ layers, 
 and since each layer multiplies its function's derivative $J[u]$ to the derivative of its previous layer,
 the derivatives for early layers scales to $J[u]^T$, so for entries greater than 1, their derivatives tend to infinity, 
@@ -841,7 +844,7 @@ Later on, this was modified by selecting $h$ based on the current decoding state
 This is done by implementing a continuous comparison function $a(s, h_i)$ which takes the 
 current decoder state $s$ and an element from the decoded sequence $h_i$ and returns a 
 number indicating the relevance of $h_i$ given $s$. This is computed for all $hh$ vectors, 
-and then the softmax function is applied to thses values. 
+and then the softmax function is applied to these values. 
 The $h$ vector used as input for the current decoding iteration is then computed as an average
 of the $hh$ vectors weighted by the coefficients returned by softmax @alignAndTranslate.
 This is known as an attention mechanism.
