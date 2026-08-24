@@ -1,4 +1,23 @@
 
+/*
+# Introdução
+
+## DDR e PIU
+### O que são
+- DDR: 1998
+- PIU: 1999
+
+### Diferenças
+- 5 teclas
+- culturas de charts
+- janelas de tempo
+
+### Charts
+- stepmania
+- stepf1 stepp1+ .ssc .sm
+
+
+*/
 The goal of this section is to familiarize the reader with the games studied by this project.
 
 DanceDanceRevolution (DDR) is a rhythm game published by the japanese company Konami

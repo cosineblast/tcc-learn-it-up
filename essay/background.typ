@@ -1,4 +1,31 @@
 
+/*
+# Background
+
+## Processamento de Áudio
+- Som é onda no ar
+- Intensidade = (Energia / Segundo) / Área ~= p²
+- Decibel entre a, b = log10(a/b)
+- Transformada de fourier
+- Escala mel
+- Features = log10(mel(FFT(audio)))
+
+## Machine learning
+- Definição
+- Regressão linear
+- Gradient descent
+- Unidade sigmoide
+- Regressão Logística
+- Multilayer perceptron
+- Backpropagation
+- Autograd
+- Convolução
+- RNN
+- BPTT
+- Gates: LSTM, GRU
+- Encoder-Decoder
+*/
+
 The goal of this section is to provide a gentle introduction to the main concepts used in this project.
 
 == Audio Intensity
