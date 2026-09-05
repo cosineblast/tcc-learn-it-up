@@ -106,6 +106,13 @@ Pump uses a numeric score for chart difficulty, usually ranging from 1 to 25.
 The difficulty affects both the frequency of steps in a chart, with harder levels having more steps,
 as well as the sequence of steps, with higher levels having more complex patterns.
 
+Pump it Up has three primary difficulty categories, Single, Double and Co-op.
+Single is the standard gameplay mode, whereas in Double charts, 
+the user plays using two dancing pads at once. Co-op is similar to Double, but in Co-op, two
+players play simultaneously, with the arrows containing visual indications 
+for the player meant to press them.
+The difficulty of each single chart is an integer rating number ranging from S1 to S25 where "S" stands for "Single".
+
 == Motivation
 
 Altough Pump it Up has a wide variety of songs, users often desire to play
