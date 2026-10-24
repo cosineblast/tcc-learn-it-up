@@ -157,21 +157,23 @@ in order to figure out the most prevalent frequencies in each instant of the son
 as Short-time Fourier transform, and the result of this operation is known a spectogram.
 For each window, 80 frequencies are sampled from the resulting fourier transform, distributed
 according to the mel scale.
-This is done three times, with three different window sizes, 23ms, 46ms and 93ms.
-The justification for this is that different timescales may better
-represent different musical features.
-All the windows are advanced by a stride of 10ms.
+This is done three times, with three different window sizes of 23ms, 46ms and 93ms, advanced by a stride of 10ms.
+The justification for using multiple window sizes is that frequency analysis on different timescales
+can better represent different kinds of musical features. @Hamel2012
 
-This whole processing is done using the ESSENTIA library, and the final
+This whole processing is done using the ESSENTIA @essentia library, and the final
 result for a song is a $N times 80 times 3$ tensor, where $N$ is the length of the song
-in tens of milliseconds, 80 is the number of frequencies used, and 3 is the number of channels used, related to the window sizes.
-// TODO: link to essentia
-// TODO: link to representations paper
+in tens of milliseconds, 80 is the number of frequencies used, and 3 is the number of channels / window sizes.
 
 In this work, we use the Pump it Up Phoenix as the primary subject dataset.
 // TODO: include song statistics
+// song count
+// chart count
+// genres
+// num authors
+// num charts
+// hour count, step count
+// arrow type 1 count
 
-
-
-
+== 
 
