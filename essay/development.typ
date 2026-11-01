@@ -17,6 +17,7 @@
 - Placement e selection
 
 ### Placement/onset: cnn e lstm
+- Explicação da estrutura do modelo, CNN, CNN+LSTM
 - shuffling do dataset
 - binary search
 
@@ -94,9 +95,9 @@ stopping arrows in the middle of the screen,
 arrows that disappear when approaching the receptors,
 and teleporting arrows. In this work, charts containing most kinds of
 gimmicks are filtered out, and the only gimmicks allowed are the scroll and speed gimmicks.
-That is not a problem in our instance, because the most recent Pump it Up editions
-(Phoenix) have very few instances of the filtered out gimmicks, with only a couple of charts being left out by this.
-// TODO: (how many?)
+That is not a huge problem in our instance, because the most recent Pump it Up editions
+(Phoenix) have very few instances of the filtered out gimmicks, with only around
+3.69% of charts being left out by this. 
 
 The conversion of beat time to second time used in the refined stepfiles is
 done using an algorithm based on the one used in DDC. It first computes the
@@ -130,5 +131,8 @@ can better represent different kinds of musical features. @Hamel2012
 This whole processing is done using the ESSENTIA @essentia library, and the final
 result for a song is a $N times 80 times 3$ tensor, where $N$ is the length of the song
 in tens of milliseconds, 80 is the number of frequencies used, and 3 is the number of channels / window sizes.
+
+
+== Model Description
 
 
