@@ -2,6 +2,14 @@
 /*
 # Background
 
+## SSC
+
+- Atributos: bpms, offset, notes
+- Measures, beats
+- Gimmicks, stops, speed, warps
+- Conversão de beats em segundos
+- Lista de bpms
+
 ## Processamento de Áudio
 - Som é onda no ar
 - Intensidade = (Energia / Segundo) / Área ~= p²
@@ -493,4 +501,68 @@ and then the softmax function is applied to these values.
 The $h$ vector used as input for the current decoding iteration is then computed as an average
 of the $hh$ vectors weighted by the coefficients returned by softmax @alignAndTranslate.
 This is known as an attention mechanism.
+
+== Pump it Up Stepfiles
+
+// TODO: link to stepmania.com
+In desktop systems, Pump it Up levels are typically organized in the `.ssc` format 
+utilized by the open source program #link("https://www.stepmania.com/")[Stepmania 5].
+This format consists of, for each music,
+a directory containing the music audio file
+(in a compressed format such as `.mp3` or `.ogg`) and the chart information file.
+
+An `.ssc` file consists of an ordered list of key-value pairs containing
+information about the song and the charts. The first attributes contain
+information about the song itself, such as music path, background video path,
+banner image, artist, song name and game edition.
+After this preamble, the file presents information about each chart,
+the most important chart attributes being difficulty, offset, BPMs and notes.
+
+
+The offset attribute consists of a decimal number indicating the amount of seconds
+between the start of the chart steps and the beggining of the audio.
+This number is usually negative, since the audio typically starts before the
+chart steps.
+
+The BPMs and notes attribute contain the main information about the chart steps.
+In Pump it Up charts, just like in music sheets, the musical notes are not placed
+using absolute time information. Instead, time is segmented into short intervals
+named beats, and the notes are placed according to these beats.
+The relationship between seconds and beats in a song is expressed by the BPM,
+or beats per minute of that song. A typical BPM value for western songs is 120
+beats per minute, or 2 beats per second, but songs may have other BPMs,
+and some songs also change their BPM during faster or slower sections.
+Additionally, another common musical time unit is the measure, which typically
+consists of 4 beats.
+#footnote[
+  In music theory, the amount of beats in a measure may vary depending on the song.
+  This is defined by what is known as the time signature of the song, but most songs
+  are in the four-four time signature, which consists of 4 beats per measure.
+  In the `.ssc` format used by this project, all charts follow this time signature,
+  so we will adopt the convention of 1 measure = 4 beats.
+]
+The BPMs attribute consists of a key-value pair list, informing for each beat in the song,
+what is the BPM of the song from that beat onward, until the next entry in the BPMs list.
+
+The notes attribute contains the step placement information.
+It consists of a list of the arrow step placements for each measure.
+The steps are represented by a string of 5 digits, each representing an arrow position
+in the pad: bottom left, up left, center, up right and down right, in order.
+The digits range from 0 to 3, where 0 represents no arrow, 1 represents a regular step arrow,
+2 represents the start of a hold arrow, and 3 represents an end of hold.
+
+For each measure in the notes attribute, the step codes are placed sequentially,
+and their offset to the start of the measure is defined by the number of step
+codes in the measure.
+For example, if a measure has four stepcodes, then each stepcode happens at the
+start of a beat.
+In musical terminology, we would say those steps occur at quarter notes, since
+each beat is a quarter of a measure.
+If a measure has eight stepcodes instead, then the stepcodes are placed every half beat in the measure,
+known as eight notes.
+Stepmania supports precision up to 196th notes, equivalent to 1/48th of a beat.
+
+// TODO: simplify this part about measures, we don't need this much detail
+// in notes. Just saying that the notes are provided per measure with relative
+// offsets is enough.
 

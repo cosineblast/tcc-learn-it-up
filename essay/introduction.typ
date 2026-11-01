@@ -145,5 +145,7 @@ as mentioned as a potential improvement in the paper DDCL:
 Our primary goal is to compare existing methodology in generative charting for Pump it Up, and to build the best Pump it Up chart generator so far.
 We aim to implement a Pump it Up replication of the papers DanceDanceConvolution (DDC) and DancedDanceConvLSTM (DDCL), Yi2023 is considered to be out of scope,
 since it involves pre-training on charts from another rhythm game osu!mania.
+We will only address the problem of generating Single charts in this work,
+leaving Double and Co-op charts for future work.
 
 
