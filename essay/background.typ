@@ -554,15 +554,6 @@ The digits range from 0 to 3, where 0 represents no arrow, 1 represents a regula
 For each measure in the notes attribute, the step codes are placed sequentially,
 and their offset to the start of the measure is defined by the number of step
 codes in the measure.
-For example, if a measure has four stepcodes, then each stepcode happens at the
-start of a beat.
-In musical terminology, we would say those steps occur at quarter notes, since
-each beat is a quarter of a measure.
-If a measure has eight stepcodes instead, then the stepcodes are placed every half beat in the measure,
-known as eight notes.
-Stepmania supports precision up to 196th notes, equivalent to 1/48th of a beat.
+Stepmania supports placement precision up to 196th of a measure, equivalent to 1/48th of a beat.
 
-// TODO: simplify this part about measures, we don't need this much detail
-// in notes. Just saying that the notes are provided per measure with relative
-// offsets is enough.
 

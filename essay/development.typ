@@ -73,7 +73,26 @@ consist of a single step arrow.
   [Hold step rate], [15.48 %],
 )
 
-== Data Processing Methodology
+== Model Description
+
+We follow the standard methodology of DDC and DDCL and divide chart generation into
+two separate tasks. The _step placement_ task consists of identifying the instants
+of the music in which the occurance of a step is suitable.
+Models implementing this task receive the audio representation of a portion of the
+song, alongside intended difficulty information, and return information about
+the times to place steps with regard to the given segment.
+In this work, step placement models are also known as _onset models_.
+
+After step placement has been executed, the _step selection_ task consists of
+determining the sequence of arrows to be assigned to each step placed for the song.
+Models implementing this task have access to the previously generated steps,
+and time-related information of the current step regarding adjacent ones.
+
+
+// TODO: change this if DDCL is implemented
+
+
+== StepFile Parsing 
 
 The first task in this project is to process the `.ssc` files, into a more detailed format
 suitable to data analysis and training.
@@ -110,15 +129,17 @@ Additionally, in the chart processing phase, we also enhance the dataset by addi
 mirrored versions of the charts. In the original DDC, paper, mirroring is applied
 both vertically and horizontally. In this work, we only apply horizontal mirroring, because
 the coherence of charts changes significantly at higher difficulties if vertical
-mirroring is applied, because the bottom and up arrows don't have the same chart
+mirroring is applied, since the bottom and up arrows don't have the same chart
 semantics, (for instance, they involve different muscles to be pressed).
 // TODO: apply vertical mirroring at low level charts.
+
+== Audio Representation
 
 Regarding audio processing, we use the same audio representation methodology of DDC and DDCL.
 
 The audio processing pipeline takes in audio files in a sampling rate of 44.1kHz,
 and stereo format (left and right channels).
-The stereo channels are averaged into a single audio channel (mono) before proecessing.
+The stereo channels are averaged into a single audio channel (mono) before processing.
 The audio is segmented into short windows, and a Fast Fourier Transform is applied to each window,
 in order to figure out the most prevalent frequencies in each instant of the song. This is known
 as Short-time Fourier transform, and the result of this operation is known a spectrogram.
@@ -132,7 +153,49 @@ This whole processing is done using the ESSENTIA @essentia library, and the fina
 result for a song is a $N times 80 times 3$ tensor, where $N$ is the length of the song
 in tens of milliseconds, 80 is the number of frequencies used, and 3 is the number of channels / window sizes.
 
+== Step Placement
 
-== Model Description
+Previous work on chart generation for rhythm games uses one of two
+distinct strategies for step placement. Frame step placement consists of analyzing
+the context around each 10ms frame of the song in order to determine whether a step
+should happen at that frame. Beat step placement consists of segmenting the song into beats and
+analyzing each beat, to determine the step placement offsets regarding the target beat.
+The DDC paper uses frame step placement, but later work such as DDCL and Yi2023 @yi2023
+report better results with beat step placement.
 
+From the perspective of a rhythm game player, it makes more sense to use beat step placement, since in traditional manual charting, arrows are not placed absolutely by the charter, but instead placed at specific fractions of the chart beats (i.e 4th notes, 8th notes, 16th notes), and which are adjusted to match the song beats and BPM, so the arrows cannot be narrowly misaligned. #footnote[Ideally.]
+Frame step placement allows for the model to miss the right times for steps by a few tens of milliseconds, which reduces the precision of the chart and makes gameplay more frustrating.
 
+In order to use beat step placement, it is necessary to have accurate BPM information of the song to be charted. Although the dataset used in this work contains correct alignment timing of the arrows, it does not provide accurate BPM information of Pump it Up songs. The vast majority of songs have BPMs information in their charts that
+does not accurately reflect the actual BPMs of the songs, with reported BPMs often 3 to 4 times lower than the real BPMs.
+Therefore, in this work, we use per frame step placement, like in the original DDC paper.
+// TODO: maybe document my ideas for workarounds for this?
+
+The step placement models receive as input the target frame, along with a context of 7 frames before and after it, as a $(15 times 80 times 3)$ tensor. It also receives a one-hot encoded vector of the intended chart difficulty, which ranges from $1$ to $25$. The model outputs a single sigmoid unit value determining its confidence that there should be a step in the target frame.
+The features of out of bound context frames are set to their minimum values across the
+entire song.
+
+Two different step placement model architectures were developed, a pure CNN network and
+a CNN-LSTM network.
+
+The CNN network starts with a convolutional layer with 10 kernels of $7 times 3$ (time, frequency) and ReLu activation, max pooling with a $1 times 3$ window, another convolutional layer with 20 kernels of $3 times 3$ and ReLu activation, and then
+max pooling with a $1 times 3$ window.
+It then passes this output alongside the one-hot difficulty vector into a multi layer perceptron, consisting of a linear layer with 256 units, ReLu activation, dropout of 50%, another linear layer with 128 units, ReLu activation, dropout of 50%, then
+a linear layer with 1 output unit, followed by the sigmoid unit.
+
+// TODO: link to relu paper
+// TODO: picture
+
+//
+// CNN-LSTM:
+// - Conv same as before
+// - Linear into 200
+// - LSTM Input = Hidden = 200, 2 layers, dropout
+// - Linear same as before
+//
+
+// Training methodology for this
+// - shuffling do dataset
+// - binary search
+// - fast convergence of results
+// - peak picking
