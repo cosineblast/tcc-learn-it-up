@@ -178,23 +178,53 @@ entire song.
 Two different step placement model architectures were developed, a pure CNN network and
 a CNN-LSTM network.
 
-The CNN network starts with a convolutional layer with 10 kernels of $7 times 3$ (time, frequency) and ReLu activation, max pooling with a $1 times 3$ window, another convolutional layer with 20 kernels of $3 times 3$ and ReLu activation, and then
-max pooling with a $1 times 3$ window.
-It then passes this output alongside the one-hot difficulty vector into a multi layer perceptron, consisting of a linear layer with 256 units, ReLu activation, dropout of 50%, another linear layer with 128 units, ReLu activation, dropout of 50%, then
-a linear layer with 1 output unit, followed by the sigmoid unit.
+The CNN network starts with two convolutional layers, the first having 10 kernels of $7 times 3$ (time, frequency) and max pooling, and the second layer having 20 kernels of $3 times 3$ and max pooling. Both kernels use ReLu for activation before max pooling, and use max pooling with a $1 times 3$ window.
+
+It then passes this output alongside the 25 element one-hot difficulty vector into a dense network. The first layer has 256 units, and the second 128 units, followed by a projection into a single sigmoid unit settling the output of the model. Both layers
+of the dense network use ReLu activation followed by a dropout of 50%.
+
+The goal of the convolutional layer is to learn spatially aware patterns from the
+data, before passing it down to the dense network for inference.
 
 // TODO: link to relu paper
 // TODO: picture
 
+The CNN-LSTM step placement network is very similar to the pure CNN network. It starts with the same initial convolutional layers, with the addition of a linear projection layer with 200 units. This is followed by a 2 layer LSTM cell with hidden size and input size of 200. The hidden state output from the LSTM is then fed to a dense network, in the same fashion as the CNN network. The LSTM layers also each have a dropout of 50% in the input-output.
+
+// TODO: confirm torch LSTM dropout really does this.
+// TODO: link to LSTM dropout paper.
+
+The LSTM recurrence allows the model to use information from previous step placements in order to decide the placement for the current frame, allowing the model to take the relationship of the current frame with the previous frames into consideration.
+
+// TODO: link to LSTM paper.
+
+=== Training methodology
+
+
+The original DDC and DDCL papers did not organize the training procedure into epochs covering the entire dataset. Instead, they sampled random sequences from the dataset until the trained model achieved saturating performance. This strategy does not guarantee that frames will be properly visited in general by the training routine. In its source code commentaries, DDC acknowledges this: 
+
+#quote(attribution: [`learn/chart.py`, Dance Dance Convolution])[
+  ```python
+        #TODO: first sequence incredibly unlikely to appear, balance this
+  ```
+]
+
+In this work, we improve on this by using a different training dataset loading strategy from DDC and DDCL, which we found to be more efficient. We segment all charts into blocks of 100 audio frames (1 second of audio) for CNN-LSTM models and blocks of 1 frame for CNN models. We do not consider frames occuring before the first step of a chart or after the last step of it. All the blocks of a chart have the same amount of frames, except possibly for the last, which can have fewer.
+#footnote[In the implementation, the returned blocks always have the fixed block size / unroll length, but the values of the last block of a chart are padded with zeroes if the block is shorter than the block size. To account for this, a binary mask is also associated with each block, indicating whether the result of that frame should be considered for learning or not. This mask is applied to the loss values of the model on the block before being summed for gradient descent.]
+ Associated with each chart block are the audio feature contexts of the frames (the model inputs) and the target step placement values (the expected model outputs).
+By using binary search, we can access any particular block of the dataset by integer index, which we use to load the dataset in shuffled order. This way, we can organize the training process proper epochs, that cover all the steps of the dataset, in random order.
+
+// Using this methodology, we only have to train for a few minutes to results similar to the ones presented in DDC, with reported training of 12 hours.
+// #footnote[In the DDC paper, a NVIDIA Tesla K40m GPU was used, which has a peak 4.29 Tflops performance for single point precision, and this work as trained with a GeForce RTX 3060 GPU with 9.462 Tflops for single point precision. Although the difference in training time is much larger than the difference in  further testing should be done to verify wether this ]
+
+// we use batch gradient descent, batch = 256, gradient cliping max l2 norm 5
 //
-// CNN-LSTM:
-// - Conv same as before
-// - Linear into 200
-// - LSTM Input = Hidden = 200, 2 layers, dropout
-// - Linear same as before
-//
+// eval:
+// hamming window, peak picking, considered correct with tolerance radius of 2 frames
+
 
 // Training methodology for this
+// - exclude before first and after last
 // - shuffling do dataset
 // - binary search
 // - fast convergence of results
