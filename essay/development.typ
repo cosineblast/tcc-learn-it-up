@@ -201,7 +201,7 @@ The LSTM recurrence allows the model to use information from previous step place
 === Training methodology
 
 
-The original DDC and DDCL papers did not organize the training procedure into epochs covering the entire dataset. Instead, they sampled random sequences from the dataset until the trained model achieved saturating performance. This strategy does not guarantee that frames will be properly visited in general by the training routine. In its source code commentaries, DDC acknowledges this: 
+The original DDC and DDCL papers did not organize the training procedure into epochs covering the entire dataset. Instead, they sampled random sequences from the dataset until the trained model achieved saturating performance in a SGD fashion. This strategy does not guarantee that frames will be properly visited in general by the training routine. In its source code commentaries, DDC acknowledges this: 
 
 #quote(attribution: [`learn/chart.py`, Dance Dance Convolution])[
   ```python
@@ -212,16 +212,16 @@ The original DDC and DDCL papers did not organize the training procedure into ep
 In this work, we improve on this by using a different training dataset loading strategy from DDC and DDCL, which we found to be more efficient. We segment all charts into blocks of 100 audio frames (1 second of audio) for CNN-LSTM models and blocks of 1 frame for CNN models. We do not consider frames occuring before the first step of a chart or after the last step of it. All the blocks of a chart have the same amount of frames, except possibly for the last, which can have fewer.
 #footnote[In the implementation, the returned blocks always have the fixed block size / unroll length, but the values of the last block of a chart are padded with zeroes if the block is shorter than the block size. To account for this, a binary mask is also associated with each block, indicating whether the result of that frame should be considered for learning or not. This mask is applied to the loss values of the model on the block before being summed for gradient descent.]
  Associated with each chart block are the audio feature contexts of the frames (the model inputs) and the target step placement values (the expected model outputs).
-By using binary search, we can access any particular block of the dataset by integer index, which we use to load the dataset in shuffled order. This way, we can organize the training process proper epochs, that cover all the steps of the dataset, in random order.
+By using binary search, we can access any particular block of the dataset by integer index, which we use to load the dataset in shuffled order. This way, we can organize the training process in proper epochs, that cover all the steps of the dataset, in random order.
 
-// Using this methodology, we only have to train for a few minutes to results similar to the ones presented in DDC, with reported training of 12 hours.
-// #footnote[In the DDC paper, a NVIDIA Tesla K40m GPU was used, which has a peak 4.29 Tflops performance for single point precision, and this work as trained with a GeForce RTX 3060 GPU with 9.462 Tflops for single point precision. Although the difference in training time is much larger than the difference in  further testing should be done to verify wether this ]
+Using this methodology, it only took 2 epochs (approximatedly 10 minutes) to achieve results similar to the ones presented in DDC, with reported training time of 12 hours. 
+#footnote[In the DDC paper, a NVIDIA Tesla K40m GPU was used, which has a peak 4.29 Tflops performance for single point precision, while this work has used a GeForce RTX 3060 GPU with 9.462 Tflops for single point precision. Although the difference in training time is much larger than the proportional difference in compute, further testing should be done to verify the extent of this loading strategy in the training of the models.]
 
 // we use batch gradient descent, batch = 256, gradient cliping max l2 norm 5
 //
 // eval:
 // hamming window, peak picking, considered correct with tolerance radius of 2 frames
-
+// exact same evaluation algorithm for proper comparison with DDC
 
 // Training methodology for this
 // - exclude before first and after last
